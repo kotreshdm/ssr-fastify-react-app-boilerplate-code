@@ -4,10 +4,8 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
+  root: process.cwd(),
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
-    },
-    extensions: [".mjs", ".js", ".jsx", ".json"],
+    alias: { "@": path.resolve(__dirname, "src") },
   },
 });

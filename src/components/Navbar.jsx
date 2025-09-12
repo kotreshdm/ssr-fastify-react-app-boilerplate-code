@@ -3,7 +3,7 @@ import React from "react";
 export default function Navbar() {
   return (
     <nav style={styles.nav}>
-      <h2 style={styles.logo}>⚡ SSR App</h2>
+      <h2 style={styles.logo}>SSR App</h2>
       <ul style={styles.menu}>
         <li>
           <a href='#'>Home</a>
