@@ -1,32 +1,16 @@
 import React from "react";
+import Home from "./components/Home";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 export default function App() {
   return (
-    <div
-      style={{
-        fontFamily: "Arial, sans-serif",
-        color: "#111827",
-        lineHeight: 1.6,
-      }}
-    >
-      <nav style={styles.nav}>
-        <h2 style={styles.logo}>SSR App</h2>
-        <ul style={styles.menu}>
-          <li>
-            <a href='#'>Home</a>
-          </li>
-          <li>
-            <a href='#'>Features</a>
-          </li>
-          <li>
-            <a href='#'>About</a>
-          </li>
-        </ul>
-      </nav>
+    <div>
+      <Navbar />
       <main>
-        <h1>Welcome to SSR React 19 App!</h1>
-        <p>This is a simple server-side rendered React application.</p>
+        <Home />
       </main>
+      <Footer />
     </div>
   );
 }
