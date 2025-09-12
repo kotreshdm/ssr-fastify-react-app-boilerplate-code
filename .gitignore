@@ -1,0 +1,36 @@
+# Node
+node_modules/
+
+# Build output
+dist/
+build/
+.next/
+out/
+public/bundle.js
+public/bundle.css
+
+# Vite / Webpack cache
+.cache/
+.temp/
+.vite/
+
+# Coverage reports
+coverage/
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
