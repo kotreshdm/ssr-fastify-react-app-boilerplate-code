@@ -1,53 +1,78 @@
 import Fastify from "fastify";
-import fastifyStatic from "@fastify/static";
 import path from "path";
-import { fileURLToPath, pathToFileURL } from "url";
+import { fileURLToPath } from "url";
 import fs from "fs";
+import fastifyStatic from "@fastify/static";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const fastify = Fastify();
+const isProd = process.env.NODE_ENV === "production";
+const server = Fastify({ logger: true });
 
-// ✅ Serve only static assets (not index.html directly)
-fastify.register(fastifyStatic, {
-  root: path.join(__dirname, "../dist/client/assets"),
-  prefix: "/assets", // e.g. /assets/index-xxxxx.js
-  decorateReply: false,
-});
+// --- API route ---
+server.get("/api/hello", async () => ({
+  message: "Hello from Fastify API 🚀",
+}));
 
-// ✅ SSR handler (catch-all for everything else)
-fastify.get("/*", async (req, reply) => {
-  try {
-    // Load built index.html as template
-    const template = fs.readFileSync(
-      path.join(__dirname, "../dist/client/index.html"),
-      "utf-8"
-    );
+// --- SSR setup ---
+async function setupSSR() {
+  if (!isProd) {
+    const { createServer: createViteServer } = await import("vite");
+    const middie = await import("@fastify/middie");
+    await server.register(middie.default);
 
-    // Resolve SSR bundle path and import it safely (Windows fix)
-    const entryServerPath = path.resolve(
-      process.cwd(),
-      "dist/server/entry-server.js"
-    );
-    const { render } = await import(pathToFileURL(entryServerPath).href);
+    const vite = await createViteServer({
+      server: { middlewareMode: "ssr" },
+      appType: "custom",
+    });
 
-    // Render React app with SSR
-    const appHtml = await render(req.url);
+    server.use(vite.middlewares);
 
-    // Inject SSR HTML into template
-    const html = template.replace(
-      `<div id="root"></div>`,
-      `<div id="root">${appHtml}</div>`
-    );
+    server.get("/*", async (req, reply) => {
+      try {
+        const url = req.raw.url;
+        const mod = await vite.ssrLoadModule("/src/entry-server.jsx");
+        const appHtml = await mod.render(url);
 
-    reply.type("text/html").send(html);
-  } catch (err) {
-    console.error("SSR Error:", err);
-    reply.code(500).send("Internal Server Error");
+        let template = fs.readFileSync(
+          path.resolve(__dirname, "../index.html"),
+          "utf-8"
+        );
+        template = await vite.transformIndexHtml(url, template);
+
+        const html = template.replace("<!--app-html-->", appHtml);
+        reply.type("text/html").send(html);
+      } catch (e) {
+        vite.ssrFixStacktrace(e);
+        server.log.error(e);
+        reply.status(500).send(e.message);
+      }
+    });
+  } else {
+    // PROD mode
+    const clientDist = path.resolve(__dirname, "../dist/client");
+    server.register(fastifyStatic, { root: clientDist, prefix: "/" });
+
+    const ssrDist = path.resolve(__dirname, "../dist/server/entry-server.js");
+    if (!fs.existsSync(ssrDist))
+      throw new Error("SSR build missing. Run npm run build.");
+
+    const { render } = await import(`file://${ssrDist}`);
+    server.get("/*", async (req, reply) => {
+      const html = render(req.raw.url);
+      reply.type("text/html").send(html);
+    });
   }
-});
+}
 
-// ✅ Start server
-fastify.listen({ port: 3000, host: "0.0.0.0" }, (err, address) => {
-  if (err) throw err;
-  console.log(`🚀 Server running at ${address}`);
-});
+const start = async () => {
+  try {
+    await setupSSR();
+    await server.listen({ port: 3000 });
+    console.log("🚀 Server running at http://localhost:3000");
+  } catch (err) {
+    server.log.error(err);
+    process.exit(1);
+  }
+};
+
+start();
