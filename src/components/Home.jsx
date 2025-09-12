@@ -5,7 +5,7 @@ export default function Home() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/hello")
+    fetch("/api/hello")
       .then((res) => res.json())
       .then((data) => setApiMessage(data.message))
       .catch(() => setApiMessage("Failed to fetch API ❌"));
