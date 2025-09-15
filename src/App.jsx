@@ -1,17 +1,19 @@
-import React from "react";
 import Home from "./components/Home";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import { AppProviders } from "./contexts";
+import AppNavbar from "./components/AppComponents/AppNavbar";
+import AppFooter from "./components/AppComponents/AppFooter";
 
 export default function App() {
   return (
-    <div>
-      <Navbar />
-      <main>
-        <Home />
-      </main>
-      <Footer />
-    </div>
+    <AppProviders>
+      <div>
+        <AppNavbar />
+        <main>
+          <Home />
+        </main>
+        <AppFooter />
+      </div>
+    </AppProviders>
   );
 }
 

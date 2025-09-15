@@ -1,10 +1,8 @@
-import React from "react";
-
 export default function Features() {
   const features = [
     "Fastify backend 🚀",
     "React 19 hydration 💧",
-    "SSR rendering ⚡",
+    "rendering ⚡",
     "API integration 🔗",
   ];
 

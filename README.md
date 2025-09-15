@@ -1,1 +1,1 @@
-# ssr-fastify-react-app-boilerplate-code
+# fastify-react-app-boilerplate-code
