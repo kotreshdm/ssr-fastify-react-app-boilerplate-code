@@ -12,7 +12,12 @@ import { setupSSR } from "./helpers/ssr.mjs";
 
 const start = async () => {
   try {
-    await registerRoutes(server);
+    await server.register(
+      async (server) => {
+        await registerRoutes(server);
+      },
+      { prefix: "/api/v1" }
+    );
     await setupSSR(server, isProd, __dirname);
     await server.listen({ port: 3000, host: "0.0.0.0" });
     console.log("🚀 Server running at http://localhost:3000");

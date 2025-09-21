@@ -5,10 +5,30 @@ export default function Home() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    fetch("/api/hello")
+    fetch("/api/v1/hello")
       .then((res) => res.json())
       .then((data) => setApiMessage(data.message))
       .catch(() => setApiMessage("Failed to fetch API ❌"));
+  }, []);
+
+  useEffect(() => {
+    async function registerUser() {
+      try {
+        const res = await fetch("/api/v1/registeruser", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: "kotreshdm",
+            password: "Dell#2323",
+          }),
+        });
+        const data = await res.json();
+        console.log("User registered successfully", data);
+      } catch (error) {
+        console.error("Error registering user", error);
+      }
+    }
+    registerUser();
   }, []);
 
   return (
