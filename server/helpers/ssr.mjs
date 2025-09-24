@@ -18,22 +18,33 @@ export async function setupSSR(server, isProd, __dirname) {
 
     server.get("/*", async (req, reply) => {
       try {
-        const url = req.raw.url;
-        const mod = await vite.ssrLoadModule("/src/entry-server.jsx");
-        const appHtml = await mod.render(url);
+        const url = req.url;
 
-        let template = fs.readFileSync(
-          path.resolve(__dirname, "../index.html"),
-          "utf-8"
-        );
-        template = await vite.transformIndexHtml(url, template);
+        let template, render;
+        if (!isProd) {
+          const vite = await import("vite");
+          const viteServer = await vite.createServer({
+            server: { middlewareMode: true },
+          });
+          template = fs.readFileSync(path.resolve("index.html"), "utf-8");
+          template = await viteServer.transformIndexHtml(url, template);
+          render = (await viteServer.ssrLoadModule("src/entry-server.jsx"))
+            .render;
+        } else {
+          template = fs.readFileSync(
+            path.resolve("dist/client/index.html"),
+            "utf-8"
+          );
+          render = (await import("../dist/server/entry-server.js")).render;
+        }
 
-        const html = template.replace("<!--app-html-->", appHtml);
+        const appHtml = await render(url);
+
+        const html = template.replace(`<!--app-html-->`, appHtml);
+
         reply.type("text/html").send(html);
       } catch (e) {
-        vite.ssrFixStacktrace(e);
-        server.log.error(e);
-        reply.status(500).send(e.message);
+        reply.status(500).send(e.stack);
       }
     });
   } else {

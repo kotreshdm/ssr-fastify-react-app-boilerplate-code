@@ -28,7 +28,7 @@ export default function Home() {
         console.error("Error registering user", error);
       }
     }
-    registerUser();
+    // registerUser();
   }, []);
 
   return (

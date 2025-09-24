@@ -1,7 +1,8 @@
-import Home from "./components/Home";
 import { AppProviders } from "./contexts";
 import AppNavbar from "./components/AppComponents/AppNavbar";
 import AppFooter from "./components/AppComponents/AppFooter";
+import AppRoutes from "./components/AppComponents/AppRoutes";
+import { Suspense } from "react";
 
 export default function App() {
   return (
@@ -9,29 +10,12 @@ export default function App() {
       <div>
         <AppNavbar />
         <main>
-          <Home />
+          <Suspense fallback={<div>Loading...</div>}>
+            <AppRoutes /> {/* dynamic content inside */}
+          </Suspense>
         </main>
         <AppFooter />
       </div>
     </AppProviders>
   );
 }
-
-const styles = {
-  nav: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "1rem 2rem",
-    background: "#1e293b",
-    color: "#fff",
-  },
-  logo: { margin: 0 },
-  menu: {
-    listStyle: "none",
-    display: "flex",
-    gap: "1.5rem",
-    margin: 0,
-    padding: 0,
-  },
-};
